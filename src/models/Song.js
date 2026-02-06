@@ -11,11 +11,6 @@ const songSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    ID:{
-        type: String,
-        unique: true,
-        default: () => crypto.randomUUID()
-    },
     genre: {
         type: String,
         required: true,
