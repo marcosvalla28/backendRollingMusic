@@ -6,6 +6,9 @@ const cookieParser = require("cookie-parser");
 const cors = require("cors");
 
 //IMPORTAMOS 
+const authRoutes = require("./routes/auth.routes");
+const songRoutes = require("./routes/song.routes");
+const userRoutes = require("./routes/user.routes");
 const connectDB = require("./config/database");
 
 const app = express();
@@ -16,8 +19,18 @@ app.use(cors());
 app.use(morgan("dev"));
 app.use(express.json());
 app.use(cookieParser());
-app.use(express.urlencoded({extended: true}))
+app.use(express.urlencoded({extended: true}));
 
+
+//ENRUTADORES
+app.use("/api/v1/auth", authRoutes);
+app.use("/api/v1/song", songRoutes);
+app.use("/api/v1/users", userRoutes);
+
+
+
+//ACA HAY QUE LLAMAR AL MIDDELWARE MANEJADOR DE ERRORES
+app.use();
 
 
 const port = process.env.PORT || 3000;
