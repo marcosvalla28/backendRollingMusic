@@ -60,7 +60,7 @@ if(err.name === 'validationError'){
     if(err.code === 'LIMIT_UNEXPECTED_FILE'){
         return res.status(400).json({
             ok: false,
-            message: `Solo se permiten ${maxCount} archivos`
+            message: 'Solo se permite 1 archivo a la vez'
         })
     }
 
