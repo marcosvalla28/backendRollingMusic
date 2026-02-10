@@ -90,7 +90,7 @@ const uploadSong = multer({
     storage: songStorage,
     limits: {fileSize: 10 * 1024 * 1024}, //10 MB
     fileFilter: songFilter
-});
+}).single('song');
 
 const uploadCover = multer({
     storage: coverStorage,
@@ -98,18 +98,8 @@ const uploadCover = multer({
     fileFilter: fileFilter
 }).single('cover')
 
-
-app.post('/upload-songs', uploadSong.single('song'), (req, res) => {
-    if(!req.file){
-        return res.status(400).json({
-            ok:false,
-            message: 'No se subió ningún archivo'
-        });
-    }
-
-    res.json({
-        ok: true,
-        message: 'Audio subido correctamente',
-        file: req.file
-    });
-});
+module.exports = {
+    uploadProfile,
+    uploadCover,
+    uploadSong
+}
