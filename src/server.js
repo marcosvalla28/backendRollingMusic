@@ -10,10 +10,14 @@ const authRoutes = require("./routes/auth.routes");
 const songRoutes = require("./routes/song.routes");
 const userRoutes = require("./routes/user.routes");
 const connectDB = require("./config/database");
+const createSuperAdmin = require("./utils/createSuperAdmin");
 
 const app = express();
 
 connectDB();
+
+createSuperAdmin();
+
 
 app.use(cors());
 app.use(morgan("dev"));
