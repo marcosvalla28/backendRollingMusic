@@ -182,69 +182,44 @@ const validateMongoID = [
 
 
 //VALIDACION PARA CREAR 
-const validateProduct = [
+const validateSong = [
 
     body('title')
     .notEmpty().withMessage('El titulo es requerido')
     .isLength({min:1}).withMessage('El titulo debe tener al menos 1 caracter'),
 
-    body('author')
-    .notEmpty().withMessage('El nombre del autor es requerido'),
-
-    body('price')
-    .notEmpty().withMessage('El precio es requerido')
-    .isFloat({min:0}).withMessage('E;precio debe ser un numero positivo'),
-
-    body('description')
-    .notEmpty().withMessage('La descripcion es requerida')
-    .isLength({min:10, max:1000}).withMessage('La descripcion debe tener de 10 a 1000 caracteres'),
+    body('artist')
+    .notEmpty().withMessage('El nombre del artista es requerido'),
 
     body('genre')
     .notEmpty().withMessage('El genero es requerido')
     .isLength({min:1}).withMessage('El genero debe tener al menos 1 caracter'),
 
-
-    body('publisher')
-    .notEmpty().withMessage('La editorial es requerida')
-    .isLength({min:1}).withMessage('La editorial debe tener al menos 1 caracter'),
-
-    body('stock')
-    .isInt({min:0}).withMessage('El stock debe ser un número entero positivo'),
+    body('duration')
+    .notEmpty().withMessage('La duracion es requerida')
+    .isInt({min:60, max:180}).withMessage('La duracion debe ser en segundos'),
 
 
     handleValidationErrorsWithFiles
 ] 
 
 //VALIDACION PARA ACTUALIZAR PRODUCTO
-const validateUpdateProduct = [
+const validateUpdateSong = [
 
     body('title')
     .optional() //ESTE CAMPO NO ES OBLIGATORIO
     .isLength({min:1}).withMessage('El titulo debe tener al menos 1 caracter'),
 
-    body('author')
+    body('artist')
     .optional(),
-
-    body('price')
-    .notEmpty().withMessage('El precio es requerido')
-    .isFloat({min:0}).withMessage('E;precio debe ser un numero positivo'),
-
-    body('description')
-    .optional()
-    .isLength({min:10, max:1000}).withMessage('La descripcion debe tener de 10 a 1000 caracteres'),
 
     body('genre')
     .optional()
     .isLength({min:1}).withMessage('El genero debe tener al menos 1 caracter'),
 
-
-    body('publisher')
+    body('duration')
     .optional()
-    .isLength({min:1}).withMessage('La editorial debe tener al menos 1 caracter'),
-
-    body('stock')
-    .optional()
-    .isInt({min:0}).withMessage('El stock debe ser un número entero positivo'),
+    .isInt({min:60, max:180}).withMessage('La duracion debe ser en segundos'),
 
 
     handleValidationErrorsWithFiles
@@ -260,6 +235,6 @@ module.exports = {
     validateSuperAdmin,
     validateVerifyEmail,
     validateMongoID,
-    validateProduct,
-    validateUpdateProduct
+    validateSong,
+    validateUpdateSong
 }
