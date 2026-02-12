@@ -1,4 +1,5 @@
 const express = require("express");
+const { validateUserId, validateMongoID, validateUpdateRole } = require("../middlewares/validator");
 
 
 
@@ -9,8 +10,8 @@ router.use();
 
 //ENDPOINTS PRICADAS PARA ADMINISTRACION DE USUARIOS
 router.get("/", ); //PEDIR TODOS LOS USUARIOS
-router.get("/:id", ); //PEDIR USUARIOS POR ID
-router.patch("/:id/role", ); //EDITAR ROL DE USUARIO
+router.get("/:id", validateUserId,); //PEDIR USUARIOS POR ID
+router.patch("/:id/role", validateMongoID, validateUpdateRole); //EDITAR ROL DE USUARIO
 router.delete("/:id", ); //ELIMINAR USUARIO
 
 module.exports = router;

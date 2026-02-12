@@ -1,4 +1,5 @@
 const express = require("express");
+const { validateRegister, validateVerifyEmail, validateLogin } = require("../middlewares/validator");
 
 
 const router = express.Router();
@@ -6,16 +7,16 @@ const router = express.Router();
 
 
 //ENDPOINTS PUBLICOS 
-router.post("/register", );
-router.post("/verify-email", );
-router.post("/login", );
+router.post("/register", uploadProfile, validateRegister);
+router.post("/verify-email", validateVerifyEmail);
+router.post("/login", validateLogin);
 
 
 
 //ENDPOINTS PRIVADOS
 router.post("/logout", );
 router.get("/profile", );
-router.put("/profile/photo");
+router.put("/profile/photo", uploadProfile );
 
 
 
