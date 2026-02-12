@@ -14,8 +14,7 @@ const songSchema = new mongoose.Schema({
     genre: {
         type: String,
         required: true,
-        enum: ['rock','pop', 'cumbia', 'bachata', 'trap', 'hip-hop', 'baladas', 'otro'],
-        unique: true
+        enum: ['rock','pop', 'cumbia', 'bachata', 'trap', 'hip-hop', 'baladas', 'otro']
     },
     frontPage: {
         type: String,
@@ -23,13 +22,17 @@ const songSchema = new mongoose.Schema({
     },
     duration: {
         type: Number,
-        require: true,
+        required: true,
     },
     audio: {
         type: String,
-        require: true
+        required: true
+    },
+    cover: {
+        type: String,
+        required: true,
+        default: "https://rolling-music.vercel.app/assets/Logo-CK57mjsi.png"
     }
-
 
 },{
     timestamps: true
