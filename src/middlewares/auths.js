@@ -1,61 +1,59 @@
-const jwt = require("jsonwebtoken");
+const jwt = require('jsonwebtoken');
 
 const auth = (req, res, next) => {
   try {
-    // Obtener token
-    const authHeader = req.header("Authorization");
+    // Obtener header Authorization
+    const authHeader = req.header('Authorization');
 
     if (!authHeader) {
       return res.status(401).json({
-        success: false,
-        message: "Acceso denegado. no se proporciono token.",
+        ok: false,
+        message: 'Acceso denegado. No se proporciono token'
       });
     }
 
-    // Extraer el token
-    const token = authHeader.replace("Bearer ", "");
-
-    if (!token) {
+    // Validar formato bearer token
+    if (!authHeader.startsWith('Bearer ')) {
       return res.status(401).json({
-        success: false,
-        message: "Formato de token inválido.",
+        ok: false,
+        message: 'Formato de token invalido'
       });
     }
 
-    // Verifico el token
+    // Extraer token
+    const token = authHeader.split(' ')[1];
+
+    // Verificar token
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    // Agregar info del usuario a la request
+    /*
+    decoded: id usuario, rol usuario
+    */
     req.user = {
-      userId: decoded.userId,
-      email: decoded.email,
-      role: decoded.role,
+      sub: decoded.sub,
+      role: decoded.role
     };
 
     next();
 
-    // Si todo esta bien, continuar
-
-    // manejar errores
   } catch (error) {
-    if (error.name === "TokenExpiredError") {
+    if (error.name === 'TokenExpiredError') {
       return res.status(401).json({
-        success: false,
-        message: "Por favor, inicia sesion nuevamente.",
+        ok: false,
+        message: 'Token expirado. Inicia sesion nuevamente'
       });
     }
 
-    if (error.name === "JsonWebTokenError") {
+    if (error.name === 'JsonWebTokenError') {
       return res.status(401).json({
-        success: false,
-        message: "Token invalido.",
+        ok: false,
+        message: 'Token invalido'
       });
     }
 
-    res.status(500).json({
-      success: false,
-      message: "Error al verificar autenticacion.",
-      error: error.message,
+    return res.status(500).json({
+      ok: false,
+      message: 'Error al verificar autenticacion'
     });
   }
 };
