@@ -11,6 +11,7 @@ const songRoutes = require("./routes/song.routes");
 const userRoutes = require("./routes/user.routes");
 const connectDB = require("./config/database");
 const createSuperAdmin = require("./utils/createSuperAdmin");
+const errorHanlder = require("./middlewares/errorHandler");
 
 const app = express();
 
@@ -34,7 +35,7 @@ app.use("/api/v1/users", userRoutes);
 
 
 //ACA HAY QUE LLAMAR AL MIDDELWARE MANEJADOR DE ERRORES
-app.use();
+app.use(errorHanlder);
 
 
 const port = process.env.PORT || 3000;

@@ -19,14 +19,6 @@ const profileStorage = multer.diskStorage({
     }
 });
 
-//Configuración para foto de perfil (1 archivo, max 2MB)
-const uploadProfile = multer({
-    storage: profileStorage,
-    limits: {fileSize: 2 * 1024 * 1024}, //2MB
-    fileFilter: fileFilter
-    
-}).single('profilePic');
-
 //Filtro de archivos
 const fileFilter = (req, file, cb) => {
     const allowedTypes = /jpeg|jpg|png|webp/;
@@ -39,6 +31,16 @@ const fileFilter = (req, file, cb) => {
         cb(new Error('Solo se permiten imagenes (jpg, jpeg, png, webp)'))
     }
 }
+
+//Configuración para foto de perfil (1 archivo, max 2MB)
+const uploadProfile = multer({
+    storage: profileStorage,
+    limits: {fileSize: 2 * 1024 * 1024}, //2MB
+    fileFilter: fileFilter
+    
+}).single('profilePic');
+
+
 
 const universalStorage = multer.diskStorage({
     destination: (req, file, cb) => {

@@ -6,9 +6,9 @@ const router = express.Router();
 
 
 //ENDPOINTS PUBLICAS
-router.get("/", ); //para pedir todas las canciones
-router.get("/search", ); //buscar canciones
-router.get(":id", ); //pedir cancion mediante su id
+/* router.get("/", ); */ //para pedir todas las canciones
+/* router.get("/search", ); */ //buscar canciones
+/* router.get(":id", ); */ //pedir cancion mediante su id
 
 
 

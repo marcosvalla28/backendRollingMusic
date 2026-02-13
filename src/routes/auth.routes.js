@@ -1,5 +1,6 @@
 const express = require("express");
 const { validateRegister, validateVerifyEmail, validateLogin } = require("../middlewares/validator");
+const { uploadProfile } = require("../config/multer");
 
 
 const router = express.Router();
@@ -14,8 +15,8 @@ router.post("/login", validateLogin);
 
 
 //ENDPOINTS PRIVADOS
-router.post("/logout", );
-router.get("/profile", );
+/* router.post("/logout", ); */
+/* router.get("/profile", ); */
 router.put("/profile/photo", uploadProfile );
 
 
