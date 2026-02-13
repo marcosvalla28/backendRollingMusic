@@ -20,7 +20,10 @@ connectDB();
 createSuperAdmin();
 
 
-app.use(cors());
+app.use(cors({
+  origin: "https://rolling-music.vercel.app",
+  credentials: true  //recibir cookie 
+}));
 app.use(morgan("dev"));
 app.use(express.json());
 app.use(cookieParser());
@@ -40,5 +43,5 @@ app.use(errorHanlder);
 
 const port = process.env.PORT || 3000;
 app.listen(port, () => {
-    console.log(`Servidor corriendo en http://localhost:${port}}`)
+    console.log(`Servidor corriendo en http://localhost:${port}`)
 }) 
