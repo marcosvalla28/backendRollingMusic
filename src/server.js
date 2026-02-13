@@ -15,7 +15,10 @@ const app = express();
 
 connectDB();
 
-app.use(cors());
+app.use(cors({
+  origin: "https://rolling-music.vercel.app",
+  credentials: true
+}));
 app.use(morgan("dev"));
 app.use(express.json());
 app.use(cookieParser());
@@ -35,5 +38,5 @@ app.use();
 
 const port = process.env.PORT || 3000;
 app.listen(port, () => {
-    console.log(`Servidor corriendo en http://localhost:${port}}`)
+    console.log(`Servidor corriendo en http://localhost:${port}`)
 }) 

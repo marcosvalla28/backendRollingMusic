@@ -2,37 +2,28 @@ const jwt = require('jsonwebtoken');
 
 const auth = (req, res, next) => {
   try {
-    // Obtener header Authorization
-    const authHeader = req.header('Authorization');
+    const token = req.cookies.token;
 
-    if (!authHeader) {
+    if (!token) {
       return res.status(401).json({
         ok: false,
-        message: 'Acceso denegado. No se proporciono token'
+        message: 'No autenticado'
       });
     }
 
-    // Validar formato bearer token
-    if (!authHeader.startsWith('Bearer ')) {
-      return res.status(401).json({
-        ok: false,
-        message: 'Formato de token invalido'
-      });
-    }
-
-    // Extraer token
-    const token = authHeader.split(' ')[1];
-
-    // Verificar token
+   
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
+    
     /*
     decoded: id usuario, rol usuario
     */
+
     req.user = {
       sub: decoded.sub,
       role: decoded.role
     };
+
 
     next();
 
