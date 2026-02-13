@@ -17,7 +17,7 @@ connectDB();
 
 app.use(cors({
   origin: "https://rolling-music.vercel.app",
-  credentials: true
+  credentials: true  //recibir cookie 
 }));
 app.use(morgan("dev"));
 app.use(express.json());
