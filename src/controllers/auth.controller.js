@@ -1,5 +1,8 @@
 const User = require("../models/User");
+const fs = require('fs')
+const path = require('path')
 const jwt = require("jsonwebtoken");
+const { sendVerificationEmail } = require("../utils/emailService");
 
 /*
    Genera un JWT de corta duracion, Sub(identificador del usuario es estandar en JWT: ID del usuario)
@@ -20,6 +23,61 @@ const generateToken = (userId, role) => {
     { expiresIn: "15m" },
   );
 };
+
+
+const register = async (req, res, next) => {
+  try {
+    const {name, surname, email, password} = req.body;
+
+    const newUser = await User.create({
+      name,
+      surname,
+      email,
+      password,
+      profilePic: req.file ? req.file.filename : null
+    });
+
+    const code = newUser.generateVerificationCode();
+    await newUser.save();
+
+    //USAMOS NODEMAILER PARA ENVIAR EL EMAIL
+    try {
+      await sendVerificationEmail(email, name, code)
+    } catch (emailError) {
+      //SI FALLA EL ENVIO DEL EMAIL ELIMINA EL USUARIO Y FOTO
+      await User.findByIdAndDelete(newUser._id);
+      if (req.file) {
+        (req.file.path);
+      }
+      return res.status(500).json({
+        ok: false,
+        message: 'Error al verificar el email. Por favor, intentar nuevamente'
+      })
+    }
+
+
+    return res.status(201).json({
+      ok: true,
+      message: 'Usuario registrado con Exito!!✅',
+      user: {
+        id: newUser._id,
+        name: newUser.name,
+        surname: newUser.surname,
+        email: newUser.email,
+        role: newUser.role,
+        photo: newUser.profilePic
+      }
+    })
+
+    
+  } catch (error) {
+    next(error)
+  }
+}
+
+
+
+
 
 /*
   LOGIN
@@ -225,6 +283,7 @@ const logout = async (req, res, next) => {
 };
 
 module.exports = {
+  register,
   login,
   verifyEmail,
   getProfile,
