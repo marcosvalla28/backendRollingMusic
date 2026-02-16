@@ -1,5 +1,6 @@
 const User = require("../models/User");
 const jwt = require("jsonwebtoken");
+const { deleteOneFile } = require("../utils/fileCleanup");
 
 /*
    Genera un JWT de corta duracion, Sub(identificador del usuario es estandar en JWT: ID del usuario)
@@ -62,12 +63,12 @@ const login = async (req, res, next) => {
     // Generar token
     const token = generateToken(user._id, user.role);
 
-    // Guardar token en cookie  
+    // Guardar token en cookie
     res.cookie("token", token, {
       httpOnly: true,
       sameSite: "lax",
       maxAge: 15 * 60 * 1000, // 15 minutos
-      secure: process.env.NODE_ENV === "production",   // secure: false  //   secure : true
+      secure: process.env.NODE_ENV === "production", // secure: false  //   secure : true
     });
 
     return res.status(200).json({
@@ -92,49 +93,56 @@ const login = async (req, res, next) => {
   
 */
 const verifyEmail = async (req, res, next) => {
-    try {
-        const {email, code} = req.body;
+  try {
+    const { email, code } = req.body;
 
-        //SI EL EMAIL YA ESTA VERIFICADO
-        const user = await User.findOne({email});
+    const user = await User.findOne({
+      email: email.toLowerCase(),
+    });
 
-        if (user.verifiedEmail) {
-            return res.status(400).json({
-                success: false,
-                message:'El email ya esta verificado'
-            })
-        }
-
-        //VERIFICAMOS EL CODIGO Y SU EXPIRACION 
-        if (user.verificationCode !== code) {
-            return res.status(400).json({
-                success: false,
-                message:'Codigo de verificacion incorrecto'
-            })
-        }
-
-        if (new Date() > user.codeExpiration) {
-            return res.status(400).json({
-                success: false,
-                message:'El codigo de verificacion expiro'
-            })
-        }
-
-        //MARCAR EL EMAIL DEL USUARIO COMO VERIFICADO
-        user.verifiedEmail = true;
-        user.verificationCode = null;
-        user.codeExpiration = null;
-        await user.save(); //ME SIENTO EN LA HOGUERA PARA SALVAR EL PUNTO
-
-        return res.status(200).json({
-            success: true,
-            message: 'Email verificado exitosamente. Ahora podes iniciar sesion'
-        })
-
-    } catch (error) {
-        next(error)
+    if (!user) {
+      return res.status(404).json({
+        ok: false,
+        message: "Usuario no encontrado",
+      });
     }
-}
+
+    if (user.verifiedEmail) {
+      return res.status(400).json({
+        ok: false,
+        message: "El email ya esta verificado",
+      });
+    }
+
+    //VERIFICAMOS EL CODIGO Y SU EXPIRACION
+    if (user.verificationCode !== code) {
+      return res.status(400).json({
+        ok: false,
+        message: "Codigo de verificacion incorrecto",
+      });
+    }
+
+    if (new Date() > user.codeExpiration) {
+      return res.status(400).json({
+        ok: false,
+        message: "El codigo de verificacion expiro",
+      });
+    }
+
+    //MARCAR EL EMAIL DEL USUARIO COMO VERIFICADO
+    user.verifiedEmail = true;
+    user.verificationCode = null;
+    user.codeExpiration = null;
+    await user.save(); //ME SIENTO EN LA HOGUERA PARA SALVAR EL PUNTO
+
+    return res.status(200).json({
+      ok: true,
+      message: "Email verificado exitosamente. Ahora podes iniciar sesion",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
 /*
   PERFIL DEL USUARIO AUTENTICADO
 */
@@ -160,47 +168,48 @@ const getProfile = async (req, res, next) => {
   }
 };
 
-const updateProfilePhoto = async (req,res, next) => {
-    try {
-
-        // validamos que el usuario suba una foto
-        if(!req.file){
-            return res.status(400).json({
-                ok:false,
-                message:"no se proporcionó ninguna imagen"
-            })
-        }
-
-        const user = await User.findById(req.user._id)
-        .select('-password -verificationCode -codeExpiration')
-        ;
-
-        // Eliminar la foto anterior si es que existe
-        if(user.profilePic){
-            const path = require('path');
-            const previousPhoto = path.join(__dirname, '../../uploads/profiles',user.profilePic)
-            deleteOneFile(previousPhoto)
-        }
-
-        // Actualizar con la nueva foto que envie el usuario
-        user.profilePic = req.file.filename;
-        await user.save()
-
-        //enviamos la respuesta
-        return res.status(201).json({
-            ok:true,
-            message:"foto de perfil actualizada 😊",
-            data: user.profilePic
-        })
-        
-    } catch (error) {
-        next(error)
+const updateProfilePhoto = async (req, res, next) => {
+  try {
+    // validamos que el usuario suba una foto
+    if (!req.file) {
+      return res.status(400).json({
+        ok: false,
+        message: "no se proporcionó ninguna imagen",
+      });
     }
-}
 
+    const user = await User.findById(req.user.sub);
+    // Eliminar la foto anterior si es que existe
+    if (!user) {
+      return res.status(404).json({
+        ok: false,
+        message: "Usuario no encontrado",
+      });
+    }
+    if (user.profilePic) {
+      const path = require("path");
+      const previousPhoto = path.join(
+        __dirname,
+        "../../uploads/profiles",
+        user.profilePic,
+      );
+      deleteOneFile(previousPhoto);
+    }
 
+    // Actualizar con la nueva foto que envie el usuario
+    user.profilePic = req.file.filename;
+    await user.save();
 
-
+    //enviamos la respuesta
+    return res.status(201).json({
+      ok: true,
+      message: "foto de perfil actualizada 😊",
+      data: user.profilePic,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
 
 /*
   LOGOUT
@@ -214,11 +223,10 @@ const logout = async (req, res, next) => {
       secure: process.env.NODE_ENV === "production",
     });
 
-      return res.status(200).json({
+    return res.status(200).json({
       ok: true,
-      message: "Sesion cerrada correctamente"
+      message: "Sesion cerrada correctamente",
     });
-
   } catch (error) {
     next(error);
   }
@@ -229,5 +237,5 @@ module.exports = {
   verifyEmail,
   getProfile,
   logout,
-  updateProfilePhoto
+  updateProfilePhoto,
 };
