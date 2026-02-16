@@ -47,7 +47,7 @@ const register = async (req, res, next) => {
       //SI FALLA EL ENVIO DEL EMAIL ELIMINA EL USUARIO Y FOTO
       await User.findByIdAndDelete(newUser._id);
       if (req.file) {
-        (req.file.path);
+        fs.unlinkSync(req.file.path);
       }
       return res.status(500).json({
         ok: false,
