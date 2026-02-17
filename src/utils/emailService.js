@@ -29,7 +29,7 @@ const sendVerificationEmail = async (email, userName, userCode) => {
               max-width: 600px;
               margin: 0 auto;
               padding: 20px;
-              background-color: #F4F4F4;
+              background-color: #202020;
             }
             .content {
               background-color: white;
@@ -39,10 +39,10 @@ const sendVerificationEmail = async (email, userName, userCode) => {
             .code {
               font-size: 32px;
               font-weight: bold;
-              color: #4CAF50;
+              color: #4B0082;
               text-align: center;
               padding: 20px;
-              background-color: #F0F0F0;
+              background-color: #202020;
               border-radius: 5px;
               letter-spacing: 5px;
             }
@@ -50,7 +50,7 @@ const sendVerificationEmail = async (email, userName, userCode) => {
               text-align: center;
               margin-top: 20px;
               font-size: 12px;
-              color: #666;
+              color: #949494;
             }
           </style>
         </head>
