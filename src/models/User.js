@@ -32,6 +32,10 @@ const userSchema = new mongoose.Schema({
         enum: ['user', 'admin', 'superadmin'],
         default: 'user'
     },
+    favorites: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Song'
+    }],
     verifiedEmail:{
         type: Boolean,
         default: false
