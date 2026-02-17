@@ -1,6 +1,8 @@
 const jwt = require('jsonwebtoken');
+const User = require('../models/User')
 
-const auth = (req, res, next) => {
+
+const auth =  (req, res, next) => {
   try {
     const token = req.cookies.token;
 
@@ -12,6 +14,7 @@ const auth = (req, res, next) => {
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    
 
     
     /*
@@ -48,4 +51,36 @@ const auth = (req, res, next) => {
   }
 };
 
-module.exports = auth;
+const verifyAdmin = (req, res, next) => {
+  if (req.user.role !== process.env.ADMIN_ROLE && req.user.role !== process.env.SUPER_ADMIN_ROLE) {
+    return res.status(403).json({
+      ok: false,
+      message: 'Acceso denegado ⛔. Se requiere permiso de administrador.'
+    })
+  }
+  next();
+}
+
+const verifySuperAdmin = (req, res, next) => {
+  if (req.user.role !== process.env.SUPER_ADMIN_ROLE) {
+    return res.status(403).json({
+      ok: false,
+      message: 'Acceso denegado ⛔, Se requiere permisos de super administrador.'
+    })
+  }
+
+  next()
+}
+
+
+
+
+
+
+
+
+module.exports = {
+  auth,
+  verifyAdmin,
+  verifySuperAdmin
+};
