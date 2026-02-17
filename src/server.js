@@ -6,21 +6,39 @@ const cookieParser = require("cookie-parser");
 const cors = require("cors");
 
 //IMPORTAMOS 
+const authRoutes = require("./routes/auth.routes");
+const songRoutes = require("./routes/song.routes");
+const userRoutes = require("./routes/user.routes");
 const connectDB = require("./config/database");
+const createSuperAdmin = require("./utils/createSuperAdmin");
+const errorHanlder = require("./middlewares/errorHandler");
+const favoritesRoutes = require("./routes/favorite.routes");
 
 const app = express();
 
 connectDB();
 
-app.use(cors());
+createSuperAdmin();
+
+app.use(cors({
+  origin: "https://rolling-music.vercel.app",
+  credentials: true  //recibir cookie 
+}));
 app.use(morgan("dev"));
 app.use(express.json());
 app.use(cookieParser());
-app.use(express.urlencoded({extended: true}))
+app.use(express.urlencoded({extended: true}));
 
+//ENRUTADORES
+app.use("/api/v1/auth", authRoutes);
+app.use("/api/v1/song", songRoutes);
+app.use("/api/v1/users", userRoutes);
+app.use("/api/v1/favorites", favoritesRoutes);
 
+//ACA HAY QUE LLAMAR AL MIDDELWARE MANEJADOR DE ERRORES
+app.use(errorHanlder);
 
 const port = process.env.PORT || 3000;
 app.listen(port, () => {
-    console.log(`Servidor corriendo en http://localhost:${port}}`)
-}) 
+    console.log(`Servidor corriendo en http://localhost:${port}`)
+})
