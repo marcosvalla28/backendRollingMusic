@@ -1,7 +1,7 @@
 const express = require("express");
 const { validateUserId, validateMongoID, validateUpdateRole } = require("../middlewares/validator");
 const { verifyAdmin, verifySuperAdmin, auth } = require("../middlewares/auths");
-const { getAllUsers, getUserById, changeUserRole } = require("../controllers/user.controller");
+const { getAllUsers, getUserById, changeUserRole, deleteUser } = require("../controllers/user.controller");
 
 
 
