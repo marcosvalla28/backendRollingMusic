@@ -30,7 +30,7 @@ const searchSong = async (req, res, next) => {
     try {
 
         //1- Capturar los parametros de busqueda de la query
-        const {  title, author, artist, genre } = req.query;
+        const {  title, artist, genre } = req.query;
 
         //2- Inicializamos variable para filtros
         let filters = {}; //Porque mongoose espera un objeto en los filtros
@@ -38,10 +38,6 @@ const searchSong = async (req, res, next) => {
         //3- Añadir filtros al objeto pero de manera condicional
         if(genre){
             filters.genre = { $regex: genre, $options: 'i'}
-        }
-
-        if(author){
-            filters.author = {$regex: author, $options: 'i'}
         } 
 
         if(artist){
@@ -107,7 +103,7 @@ const getSongById = async (req, res, next) => {
 const createSong = async (req, res, next) => {
     try {
         //Capturar la informacion
-        const { title, author, artist, genre, duration } = req.body;
+        const { title, artist, genre, duration } = req.body;
 
         //Verificar que se hayan subido canciones
         if(!req.files || !req.files.cover || !req.files.audio){
@@ -121,7 +117,6 @@ const createSong = async (req, res, next) => {
         //Creo la cancion nueva
         const song = new Songs({
             title,
-            author,
             artist,
             genre,
             duration,
@@ -150,7 +145,7 @@ const updateSong = async (req, res, next) => {
     try {
         //1- Capturamos la info necesaria
         const { id } = req.params; //ID de la cancion
-        const { title, author, artist, duration, genre, cover } = req.body; //Info a actualizar
+        const { title, artist, duration, genre, cover } = req.body; //Info a actualizar
 
         //2- Buscar la cancion por su ID
         const song = await Songs.findById(id);
@@ -166,7 +161,6 @@ const updateSong = async (req, res, next) => {
 
         //4- Actulizar los campos de la cancion
         if(title) song.title = title;
-        if(author) song.author = author;
         if(artist) song.artist = artist;
         if(genre) song.genre = genre;
         if(duration) song.duration = duration;
@@ -176,7 +170,7 @@ const updateSong = async (req, res, next) => {
         if(req.files && req.files.cover){
 
             //Buscamos las rutas de las imagenes viejas y la guardamos en una variable
-            const oldCoverPath = getCompleteRoute(song.cover, 'songs');
+            const oldCoverPath = getCompleteRoute(song.cover, 'covers');
 
         //Eliminamos las imagenes viejas usando las rutas que guardamos antes
         deleteFiles([oldCoverPath])
@@ -225,7 +219,7 @@ const deleteSong = async (req, res, next) => {
         }
 
         //4- Eliminar la imagen y la canción
-        const coverPath = getCompleteRoute(song.cover, 'songs');
+        const coverPath = getCompleteRoute(song.cover, 'covers');
         const audioPath = getCompleteRoute(song.audio, 'songs');
 
         //5- Eliminamos las imagenes viejas usando las rutas que guardamos antes
