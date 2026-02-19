@@ -91,6 +91,7 @@ const verifySuperAdmin = (req, res, next) => {
             message: 'Acceso denegado. Se requieren permisos de super administrador'
         })
     }
+    next()
 }
 
 module.exports = {
