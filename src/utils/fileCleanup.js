@@ -33,11 +33,18 @@ const cleanUploadsFiles = (req) => {
         deleteOneFile(req.file.path);
     }
 
-    if(req.files && Array.isArray(req.files)){
-        req.files.forEach(file => deleteOneFile(file.path))
+    if(req.files){
+        if (Array.isArray(req.files)) {
+            req.files.forEach(file => deleteOneFile(file.path));
+        }
 
+        else {
+            Object.values(req.files).forEach(fileArray => {
+                fileArray.forEach(file => deleteOneFile(file.path));
+            });
+        }
     }
-}
+};
 
 //obtener ruta completa del archivo desde nombre
 const getCompleteRoute = (fileName, type) => {
