@@ -9,6 +9,6 @@ const router = express.Router();
 router.get("/", auth, getFavorites);
 
 //Agregar o quitar una cancion de favoritos
-router.patch("/:id", auth, toggleFavorite);
+router.patch("/:id", auth, validateMongoID, toggleFavorite);
 
 module.exports = router;
