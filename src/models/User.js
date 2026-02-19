@@ -33,8 +33,8 @@ const userSchema = new mongoose.Schema({
         default: 'user'
     },
     favorites: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Song'
+        type: String, // Guardamos el codigo_unico para identificar el origen
+        required: false
     }],
     verifiedEmail:{
         type: Boolean,
@@ -63,7 +63,7 @@ userSchema.pre('save', async function () {
 })
 
 
-userSchema.methods.comparePasswords = async function (userPassword) {
+userSchema.methods.comparePassword = async function (userPassword) {
 
     return await bcrypt.compare(userPassword, this.password)
 }
