@@ -28,53 +28,32 @@ const getAllSongs = async (req, res, next) => {
 //Buscar una cancion
 const searchSong = async (req, res, next) => {
     try {
+        const { term, genre, page = 1, limit = 10 } = req.query;
+        let filters = {};
 
-        //1- Capturar los parametros de busqueda de la query
-        const {  title, author, artist, genre } = req.query;
-
-        //2- Inicializamos variable para filtros
-        let filters = {}; //Porque mongoose espera un objeto en los filtros
-
-        //3- Añadir filtros al objeto pero de manera condicional
-        if(genre){
-            filters.genre = { $regex: genre, $options: 'i'}
-        }
-
-        if(author){
-            filters.author = {$regex: author, $options: 'i'}
+        // 🛠️ Si viene 'genre', filtramos estrictamente por ese campo
+        if (genre) {
+            filters.genre = { $regex: `^${genre}$`, $options: 'i' }; 
+            // Usamos ^ y $ para que sea búsqueda exacta del género (ej: 'Rock' y no 'Rock and Roll')
         } 
-
-        if(artist){
-            filters.artist = {$regex: artist, $options: 'i'}
+        // Si no hay género pero hay 'term', buscamos en título/artista
+        else if (term) {
+            filters.$or = [
+                { title: { $regex: term, $options: 'i' } },
+                { artist: { $regex: term, $options: 'i' } }
+            ];
         }
 
-        if(title){
-            filters.title = {$regex: title, $options: 'i'}
-        }
+        const songs = await Songs.find(filters)
+            .sort({ createdAt: -1 })
+            .limit(parseInt(limit))
+            .skip((parseInt(page) - 1) * parseInt(limit));
 
-        //4- Aplico los filtros directamente en el metodo find de mongoose
-        const songs = await Songs.find(filters).sort({createdAt: -1});
-
-        //5- Si no encontró canciones doy una respuesta
-        if(!songs || songs.length === 0){
-            return res.status(404).json({
-                ok: false,
-                message: 'No se encontraron coincidencias para la busqueda'
-            })
-        }
-
-        //6- Respuesta al cliente en los resultados
-        return res.json({
-            ok: true,
-            message: 'Canciones encontradas 🎵',
-            length: songs.length,
-            data: songs
-        })
-        
+        res.json({ ok: true, data: songs });
     } catch (error) {
-        next(error)
+        next(error);
     }
-}
+};
 
 //Obtener una cancion por su ID
 const getSongById = async (req, res, next) => {
@@ -106,10 +85,10 @@ const getSongById = async (req, res, next) => {
 //Crear cancion (solo admin o super admin)
 const createSong = async (req, res, next) => {
     try {
-        //Capturar la informacion
-        const { title, author, artist, genre, duration } = req.body;
+        // 1. Capturamos la info (Quitamos author que no existe)
+        const { title, artist, genre, duration } = req.body;
 
-        //Verificar que se hayan subido canciones
+        // 2. Verificar archivos
         if(!req.files || !req.files.cover || !req.files.audio){
             cleanUploadsFiles(req);
             return res.status(400).json({
@@ -118,21 +97,21 @@ const createSong = async (req, res, next) => {
             })
         }
 
-        //Creo la cancion nueva
+        // 3. Crear la canción (Corregido: quitamos author y aseguramos duration)
         const song = new Songs({
             title,
-            author,
-            artist,
+            artist, // Antes tenías 'author' aquí, eso rompía el código
             genre,
-            duration,
+            // Si duration no viene del front, le asignamos un valor por defecto 
+            // para que Mongoose no de error si es 'required'
+            duration: duration || 0, 
             cover: req.files.cover[0].filename,
             audio: req.files.audio[0].filename
         });
 
-        //Guardar en mongo
+        // 4. Guardar en mongo
         await song.save();
 
-        //Respuesta al cliente con mensaje exitoso
         return res.status(201).json({
             ok: true,
             message: 'Cancion creada con exito 🎵',
@@ -140,6 +119,7 @@ const createSong = async (req, res, next) => {
         })
         
     } catch (error) {
+        // Si hay error de validación de Mongoose, limpiamos archivos subidos
         cleanUploadsFiles(req)
         next(error)
     }
@@ -150,7 +130,7 @@ const updateSong = async (req, res, next) => {
     try {
         //1- Capturamos la info necesaria
         const { id } = req.params; //ID de la cancion
-        const { title, author, artist, duration, genre, cover } = req.body; //Info a actualizar
+        const { title, artist, duration, genre, cover } = req.body; //Info a actualizar
 
         //2- Buscar la cancion por su ID
         const song = await Songs.findById(id);
@@ -166,7 +146,6 @@ const updateSong = async (req, res, next) => {
 
         //4- Actulizar los campos de la cancion
         if(title) song.title = title;
-        if(author) song.author = author;
         if(artist) song.artist = artist;
         if(genre) song.genre = genre;
         if(duration) song.duration = duration;
@@ -176,7 +155,7 @@ const updateSong = async (req, res, next) => {
         if(req.files && req.files.cover){
 
             //Buscamos las rutas de las imagenes viejas y la guardamos en una variable
-            const oldCoverPath = getCompleteRoute(song.cover, 'songs');
+            const oldCoverPath = getCompleteRoute(song.cover, 'covers');
 
         //Eliminamos las imagenes viejas usando las rutas que guardamos antes
         deleteFiles([oldCoverPath])
@@ -225,7 +204,7 @@ const deleteSong = async (req, res, next) => {
         }
 
         //4- Eliminar la imagen y la canción
-        const coverPath = getCompleteRoute(song.cover, 'songs');
+        const coverPath = getCompleteRoute(song.cover, 'covers');
         const audioPath = getCompleteRoute(song.audio, 'songs');
 
         //5- Eliminamos las imagenes viejas usando las rutas que guardamos antes
