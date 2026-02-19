@@ -1,12 +1,14 @@
 const express = require("express");
 const { validateUserId, validateMongoID, validateUpdateRole } = require("../middlewares/validator");
-const { auth, verifyAdmin } = require("../middlewares/auths");
+const { verifyAdmin, verifySuperAdmin, auth } = require("../middlewares/auths");
 const { getAllUsers, getUserById, changeUserRole, deleteUser } = require("../controllers/user.controller");
+
+
 
 const router = express.Router();
 
 //TODAS LAS RUTAS REQUIEREN AUTENTICACION Y PERMISOS DE ADMIN 
-router.use(auth, verifyAdmin);
+router.use(verifySuperAdmin, auth);
 
 //ENDPOINTS PRIVADAS PARA ADMINISTRACION DE USUARIOS
 router.get("/", getAllUsers); //PEDIR TODOS LOS USUARIOS
