@@ -7,15 +7,15 @@ const { deleteOneFile } = require('../utils/fileCleanup');
 
 //funcion auxiliar para poder generar el token
 const generateToken = (id) => {
-    return jwt.sign({id}, process.env.JWT_SECRET, {
+    return jwt.sign({ id }, process.env.JWT_SECRET, {
         expiresIn: '1h'
     });
 };
 
 const register = async (req, res, next) => {
-    
+
     try {
-        const {name, surname, email, password} = req.body;
+        const { name, surname, email, password } = req.body;
 
         //Crear el usuario con mongoose
         const newUser = await User.create({
@@ -36,22 +36,22 @@ const register = async (req, res, next) => {
         } catch (emailError) {
             //si falla el envio del email, eliminar el usuario y foto
             await User.findByIdAndDelete(newUser._id)
-            if(req.file){
-                (req.file.path)
+            if (req.file) {
+                deleteOneFile(req.file.path)
             }
 
             return res.status(500).json({
                 ok: false,
                 message: "error al enviar el email de verificación. Por favor, intenta nuevamente."
             })
-            
+
         }
 
 
         return res.status(201).json({
             ok: true,
             message: 'Usuario registrado con exito!!!',
-            user:{
+            user: {
                 id: newUser._id,
                 name: newUser.name,
                 email: newUser.email,
@@ -59,21 +59,21 @@ const register = async (req, res, next) => {
                 photo: newUser.profilePic
             }
         })
-        
+
     } catch (error) {
         next(error)
     }
 
 }
 
-const verifyEmail = async (req, res) => {
+const verifyEmail = async (req, res, next) => {
     try {
-        const {email, code} = req.body;
+        const { email, code } = req.body;
 
         //si el email ya esta verificado
-        const user = await User.findOne({email});
-        
-        if (user.verifiedEmail){
+        const user = await User.findOne({ email });
+
+        if (user.verifiedEmail) {
             return res.status(400).json({
                 success: false,
                 message: 'El email ya está verificado'
@@ -81,14 +81,14 @@ const verifyEmail = async (req, res) => {
         }
 
         //verificar el codigo y su expiración
-        if(user.verificationCode !== code){
+        if (user.verificationCode !== code) {
             return res.status(400).json({
                 success: false,
                 message: 'El código de verificación es incorrecto'
             })
         }
 
-        if(new Date() > user.codeExpiration){
+        if (new Date() > user.codeExpiration) {
             return res.status(400).json({
                 success: false,
                 message: 'El código de verificación expiró'
@@ -115,20 +115,20 @@ const login = async (req, res) => {
     console.log("Cuerpo recibido en el login:", req.body);
     try {
 
-        const {email, password, isGoogleLogin = false, name, surname } = req.body;
+        const { email, password, isGoogleLogin = false, name, surname } = req.body;
 
-        let user = await User.findOne({email});
+        let user = await User.findOne({ email });
 
         if (isGoogleLogin) {
             if (!user) {
                 // Creamos el usuario si no existe
                 user = new User({
                     name: name,
-                    surname: surname, 
+                    surname: surname,
                     email: email,
-                    password: crypto.randomBytes(16).toString('hex'), 
-                    verifiedEmail: true, 
-                    role: 'user' 
+                    password: crypto.randomBytes(16).toString('hex'),
+                    verifiedEmail: true,
+                    role: 'user'
                 });
                 await user.save();
             }
@@ -143,7 +143,7 @@ const login = async (req, res) => {
             }
 
             const validPassword = await user.comparePassword(password);
-            if (!validPassword){
+            if (!validPassword) {
                 return res.status(401).json({
                     ok: false,
                     message: 'Credenciales inválidas'
@@ -195,7 +195,7 @@ const logout = async (req, res, next) => {
             ok: true,
             message: 'Logout exitoso ✅'
         })
-        
+
     } catch (error) {
         next(error)
     }
@@ -206,7 +206,7 @@ const getUserProfile = async (req, res, next) => {
     try {
 
         const user = await User.findById(req.user._id)
-        .select('-password -verificationCode -codeExpiration');
+            .select('-password -verificationCode -codeExpiration');
 
         return res.status(200).json({
             ok: true,
@@ -223,7 +223,7 @@ const updateProfile = async (req, res, next) => {
     try {
         // 🛠️ Solo extraemos name y surname, ignoramos el email si viene en el body
         const { name, surname } = req.body;
-        const userId = req.user.id; 
+        const userId = req.user.id;
 
         const updatedUser = await User.findByIdAndUpdate(
             userId,
@@ -249,7 +249,7 @@ const updateProfilePhoto = async (req, res, next) => {
     try {
 
         //validamos que el usuario suba una foto
-        if(!req.file){
+        if (!req.file) {
             return res.status(400).json({
                 ok: false,
                 message: 'No se proporcionó ninguna imagen'
@@ -257,9 +257,9 @@ const updateProfilePhoto = async (req, res, next) => {
         }
 
         const user = await User.findById(req.user._id)
-        .select('-password -verificationCode -codeExpiration');
+            .select('-password -verificationCode -codeExpiration');
 
-        if(!user){
+        if (!user) {
             return res.status(404).json({
                 ok: false,
                 message: 'Usuario no encontrado'
@@ -267,7 +267,7 @@ const updateProfilePhoto = async (req, res, next) => {
         }
 
         //eliminar la foto anterior si es que existe
-        if(user.profilePic){
+        if (user.profilePic) {
             const path = require('path');
             const previousPhoto = path.join(__dirname, '../uploads/profiles', user.profilePic);
             deleteOneFile(previousPhoto)
