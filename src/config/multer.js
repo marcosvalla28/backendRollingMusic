@@ -66,21 +66,28 @@ const universalStorage = multer.diskStorage({
 
 //Filtro que acepte a ambos
 const multerFilter = (req, file, cb) => {
+    // Para Cover o Img (Imágenes)
     if(file.fieldname === 'cover' || file.fieldname === 'img') {
-        const allowedTypes = /jpg|jpeg|png|webp/;
-        const isPhoto = allowedTypes.test(path.extname(file.originalname).toLocaleLowerCase()) && allowedTypes.test(file.mimetype);
-        if (isPhoto) return cb(null, true);
-        return cb(new Error('La portada debe ser una imagen jpg, jpeg, png o webp'), false);
+        const allowedMimeTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+        
+        if (allowedMimeTypes.includes(file.mimetype)) {
+            return cb(null, true);
+        }
+        return cb(new Error('La portada debe ser una imagen válida (jpg, png, webp)'), false);
     }
 
+    // Para Audio
     if (file.fieldname === 'audio'){
-        const allowedTypes = [
-            'audio/mpeg',
+        const allowedAudioTypes = [
+            'audio/mpeg', // mp3
             'audio/wav',
-            'audio/ogg'
+            'audio/ogg',
+            'audio/mp3'   // Agregamos este por si acaso
         ];
 
-        if (allowedTypes.includes(file.mimetype)) return cb(null, true);
+        if (allowedAudioTypes.includes(file.mimetype)) {
+            return cb(null, true);
+        }
         return cb(new Error('El archivo de audio debe ser mp3, wav u ogg'), false);
     }
 

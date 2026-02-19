@@ -85,10 +85,10 @@ const getSongById = async (req, res, next) => {
 //Crear cancion (solo admin o super admin)
 const createSong = async (req, res, next) => {
     try {
-        //Capturar la informacion
+        // 1. Capturamos la info (Quitamos author que no existe)
         const { title, artist, genre, duration } = req.body;
 
-        //Verificar que se hayan subido canciones
+        // 2. Verificar archivos
         if(!req.files || !req.files.cover || !req.files.audio){
             cleanUploadsFiles(req);
             return res.status(400).json({
@@ -97,21 +97,21 @@ const createSong = async (req, res, next) => {
             })
         }
 
-        //Creo la cancion nueva
+        // 3. Crear la canción (Corregido: quitamos author y aseguramos duration)
         const song = new Songs({
             title,
-            author,
-            artist,
+            artist, // Antes tenías 'author' aquí, eso rompía el código
             genre,
-            duration,
+            // Si duration no viene del front, le asignamos un valor por defecto 
+            // para que Mongoose no de error si es 'required'
+            duration: duration || 0, 
             cover: req.files.cover[0].filename,
             audio: req.files.audio[0].filename
         });
 
-        //Guardar en mongo
+        // 4. Guardar en mongo
         await song.save();
 
-        //Respuesta al cliente con mensaje exitoso
         return res.status(201).json({
             ok: true,
             message: 'Cancion creada con exito 🎵',
@@ -119,6 +119,7 @@ const createSong = async (req, res, next) => {
         })
         
     } catch (error) {
+        // Si hay error de validación de Mongoose, limpiamos archivos subidos
         cleanUploadsFiles(req)
         next(error)
     }

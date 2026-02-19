@@ -115,20 +115,21 @@ const login = async (req, res) => {
     console.log("Cuerpo recibido en el login:", req.body);
     try {
 
-        const {email, password, isGoogleLogin = false } = req.body;
+        const {email, password, isGoogleLogin = false, name, surname } = req.body;
 
         let user = await User.findOne({email});
 
         if (isGoogleLogin) {
             if (!user) {
+                // Creamos el usuario si no existe
                 user = new User({
-                    name: req.body.name || "Usuario Google",
+                    name: name,
+                    surname: surname, 
                     email: email,
-                    password: crypto.randomBytes(16).toString('hex'), // Password aleatoria por seguridad
-                    verifiedEmail: true, // Google ya lo verificó
-                    role: 'user' // Por defecto
+                    password: crypto.randomBytes(16).toString('hex'), 
+                    verifiedEmail: true, 
+                    role: 'user' 
                 });
-
                 await user.save();
             }
         }
@@ -218,6 +219,32 @@ const getUserProfile = async (req, res, next) => {
     }
 }
 
+const updateProfile = async (req, res, next) => {
+    try {
+        // 🛠️ Solo extraemos name y surname, ignoramos el email si viene en el body
+        const { name, surname } = req.body;
+        const userId = req.user.id; 
+
+        const updatedUser = await User.findByIdAndUpdate(
+            userId,
+            { name, surname }, // 🛠️ No incluimos el email en la actualización
+            { new: true, runValidators: true }
+        ).select('-password');
+
+        if (!updatedUser) {
+            return res.status(404).json({ ok: false, message: 'Usuario no encontrado' });
+        }
+
+        return res.status(200).json({
+            ok: true,
+            message: 'Perfil actualizado correctamente',
+            data: updatedUser
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
 const updateProfilePhoto = async (req, res, next) => {
     try {
 
@@ -271,5 +298,6 @@ module.exports = {
     verifyEmail,
     logout,
     getUserProfile,
+    updateProfile,
     updateProfilePhoto
 }
