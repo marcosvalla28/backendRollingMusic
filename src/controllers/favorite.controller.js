@@ -2,29 +2,33 @@ const User = require('../models/User');
 
 const toggleFavorite = async (req, res, next) => {
     try {
-        const { id } = req.params;
-        const userId = req.user._id; // Se obtiene del middleware de auth
+        
+        const { id } = req.params; 
+        const userId = req.user._id;
 
-        //1. Buscar al usuario
         const user = await User.findById(userId);
 
-        if (!user){
+        if (!user) {
             return res.status(404).json({
                 ok: false,
                 message: 'Usuario no encontrado'
-            })
+            });
         }
 
-        //2. Verificar si la cancion ya esta en favoritos
         const isFavorite = user.favorites.includes(id);
-        const updateAction = isFavorite ? {$pull: {favorites: id}} : {$addToSet: {favorites: id}};
+        
+        const updateAction = isFavorite 
+            ? { $pull: { favorites: id } } 
+            : { $addToSet: { favorites: id } };
+        
         const message = isFavorite ? 'Quitada de favoritos' : 'Agregada a favoritos';
 
         await User.findByIdAndUpdate(userId, updateAction);
 
         return res.status(200).json({
             ok: true,
-            message: `${message} 🎵`
+            message: `${message} 🎵`,
+            isFavorite: !isFavorite 
         });
 
     } catch (error) {
@@ -35,11 +39,7 @@ const toggleFavorite = async (req, res, next) => {
 const getFavorites = async (req, res, next) => {
     try {
         const userId = req.user._id;
-
-        const user = await User.findById(userId).populate({
-            path: 'favorites',
-            select: 'title artist cover audio'
-        });
+        const user = await User.findById(userId);
 
         return res.status(200).json({
             ok: true,
@@ -47,11 +47,11 @@ const getFavorites = async (req, res, next) => {
         });
         
     } catch (error) {
-        next(error)
+        next(error);
     }
 }
 
 module.exports = {
     toggleFavorite,
     getFavorites
-}
+};
