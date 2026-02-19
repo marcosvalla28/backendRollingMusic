@@ -1,26 +1,20 @@
 const express = require("express");
 const { validateRegister, validateVerifyEmail, validateLogin } = require("../middlewares/validator");
 const { uploadProfile } = require("../config/multer");
-const { register, verifyEmail, logout, getProfile, updateProfilePhoto, login } = require("../controllers/auth.controller");
+const { authLimiter } = require("../middlewares/rateLimiter");
+const { register, verifyEmail, login, logout, getUserProfile, updateProfilePhoto } = require("../controllers/auth.controller");
 const { auth } = require("../middlewares/auths");
 
-
 const router = express.Router();
-
-
 
 //ENDPOINTS PUBLICOS 
 router.post("/register", uploadProfile, validateRegister, register);
 router.post("/verify-email", validateVerifyEmail, verifyEmail);
 router.post("/login", validateLogin, login);
 
-
-
 //ENDPOINTS PRIVADOS
 router.post("/logout", auth, logout);
-router.get("/profile", auth, getProfile);
-router.put("/profile/photo", auth, uploadProfile, updateProfilePhoto);
-
-
+router.get("/profile", auth, getUserProfile );
+router.put("/profile/photo", auth, uploadProfile, updateProfilePhoto  );
 
 module.exports = router;

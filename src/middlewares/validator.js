@@ -150,7 +150,6 @@ const validateSuperAdmin = [
     handleValidationErrors
 ]
 
-
 //VALIDACIONES PARA EL CODIGO DE VERIFICACION DEL EMAIL
 const validateVerifyEmail = [
     body('email')
@@ -178,9 +177,6 @@ const validateMongoID = [
     handleValidationErrors
 ]
 
-
-
-
 //VALIDACION PARA CREAR 
 const validateSong = [
 
@@ -197,7 +193,7 @@ const validateSong = [
 
     body('duration')
     .notEmpty().withMessage('La duracion es requerida')
-    .isInt({min:60, max:180}).withMessage('La duracion debe ser en segundos'),
+    .isInt({min:60, max:300}).withMessage('La duracion debe ser en segundos'),
 
 
     handleValidationErrorsWithFiles
@@ -219,13 +215,11 @@ const validateUpdateSong = [
 
     body('duration')
     .optional()
-    .isInt({min:60, max:180}).withMessage('La duracion debe ser en segundos'),
+    .isInt({min:60, max:300}).withMessage('La duracion debe ser en segundos'),
 
 
     handleValidationErrorsWithFiles
 ] 
-
-
 
 module.exports = {
     validateRegister,
