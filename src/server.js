@@ -29,6 +29,22 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(express.urlencoded({extended: true}));
 
+app.use('/uploads', express.static(path.join(__dirname, '../uploads'), {
+    setHeaders: (res, path) => {
+        // 🛠️ 1. Permitir que el frontend (Vite) lea el archivo
+        res.set('Access-Control-Allow-Origin', 'http://localhost:5173');
+        
+        // 🛠️ 2. FORZAR REPRODUCCIÓN (Esto mata la descarga)
+        // 'inline' le dice al navegador que lo abra en el reproductor interno
+        res.set('Content-Disposition', 'inline');
+        
+        // 🛠️ 3. Asegurar el tipo de archivo para audios
+        if (path.endsWith('.mp3')) {
+            res.set('Content-Type', 'audio/mpeg');
+        }
+    }
+}));
+
 //ENRUTADORES
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/song", songRoutes);
