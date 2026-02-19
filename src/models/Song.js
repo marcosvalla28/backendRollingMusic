@@ -16,14 +16,6 @@ const songSchema = new mongoose.Schema({
         required: true,
         enum: ['rock','pop', 'cumbia', 'bachata', 'trap', 'hip-hop', 'baladas', 'otro']
     },
-    frontPage: {
-        type: String,
-        default: "https://rolling-music.vercel.app/assets/Logo-CK57mjsi.png",
-    },
-    duration: {
-        type: Number,
-        required: true,
-    },
     audio: {
         type: String,
         required: true

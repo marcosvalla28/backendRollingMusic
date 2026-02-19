@@ -19,29 +19,22 @@ const handleValidationErrors = (req, res, next) => {
 }
 
 const handleValidationErrorsWithFiles = (req, res, next) => {
-
     const errors = validationResult(req);
 
     if (!errors.isEmpty()) {
-        //SI HAY ERRORES Y SE SUBIO A ARCHIVOS NECESITO ELIMINARLOS
-        if (req.file) {
-            deleteOneFile(req.file.path)
+        // Si hay errores de validación, borramos lo que Multer haya subido
+        if (req.file || req.files) {
+            cleanUploadsFiles(req);
         }
-
-        if (req.files && Array.isArray(req.files)) {
-        cleanUploadsFiles(req);
-    }
 
         return res.status(400).json({
             ok: false,
             message: 'Errores de validacion',
             errors: errors.mapped()
-        })
+        });
     }
-
-    next()
-
-}
+    next();
+};
 
 
 //VALIDACIONES PARA EL REGISTRO DE UN USUARIO
@@ -89,24 +82,24 @@ const validateRegister = [
 //VALIDACION PARA LOGIN
 const validateLogin = [
     body('email')
-    .notEmpty().withMessage('El email es requerido')
-    .isEmail().withMessage('El email ingresado debe ser valido')
-    .normalizeEmail()
-    .custom(async(email) => {
-        const user = await User.findOne({email})
-        if (!user) {
-            throw new Error('Credencial incorrecta')
-        }
-    }),
+        .notEmpty().withMessage('El email es requerido')
+        .isEmail().withMessage('El email ingresado debe ser valido')
+        .normalizeEmail(),
 
     body('password')
-    .notEmpty().withMessage('La contrasena es requerida')
-    .isLength({min: 6}).withMessage('La contrasena debe tener al menos 6 caracteres'),
+        // 🛠️ CAMBIO: Si viene name y surname, asumimos que es registro/login de Google y no pedimos password
+        .custom((value, { req }) => {
+            if (req.body.isGoogleLogin === 'true' || req.body.isGoogleLogin === true) {
+                return true; // Salta la validación
+            }
+            if (!value || value.length < 6) {
+                throw new Error('La contrasena debe tener al menos 6 caracteres');
+            }
+            return true;
+        }),
 
-
-    
     handleValidationErrors
-]
+];
 
 //VALIDACION PARA DELETE
 const validateUserId = [
@@ -179,47 +172,39 @@ const validateMongoID = [
 
 //VALIDACION PARA CREAR 
 const validateSong = [
-
     body('title')
-    .notEmpty().withMessage('El titulo es requerido')
-    .isLength({min:1}).withMessage('El titulo debe tener al menos 1 caracter'),
+        .notEmpty().withMessage('El titulo es requerido')
+        .trim(),
 
     body('artist')
-    .notEmpty().withMessage('El nombre del artista es requerido'),
+        .notEmpty().withMessage('El nombre del artista es requerido')
+        .trim(),
 
     body('genre')
-    .notEmpty().withMessage('El genero es requerido')
-    .isLength({min:1}).withMessage('El genero debe tener al menos 1 caracter'),
+        .notEmpty().withMessage('El genero es requerido')
+        .isIn(['rock','pop', 'cumbia', 'bachata', 'trap', 'hip-hop', 'baladas', 'otro'])
+        .withMessage('Género no válido'),
 
+    // 🛠️ CAMBIO: Quitamos la obligatoriedad de duration si no la envías desde el front
     body('duration')
-    .notEmpty().withMessage('La duracion es requerida')
-    .isInt({min:60, max:300}).withMessage('La duracion debe ser en segundos'),
-
+        .optional()
+        .isInt({min: 1}).withMessage('La duracion debe ser un número positivo'),
 
     handleValidationErrorsWithFiles
-] 
+];
 
 //VALIDACION PARA ACTUALIZAR PRODUCTO
 const validateUpdateSong = [
-
-    body('title')
-    .optional() //ESTE CAMPO NO ES OBLIGATORIO
-    .isLength({min:1}).withMessage('El titulo debe tener al menos 1 caracter'),
-
-    body('artist')
-    .optional(),
-
+    body('title').optional().trim().isLength({min:1}),
+    body('artist').optional().trim(),
     body('genre')
-    .optional()
-    .isLength({min:1}).withMessage('El genero debe tener al menos 1 caracter'),
-
-    body('duration')
-    .optional()
-    .isInt({min:60, max:300}).withMessage('La duracion debe ser en segundos'),
-
+        .optional()
+        .isIn(['rock','pop', 'cumbia', 'bachata', 'trap', 'hip-hop', 'baladas', 'otro'])
+        .withMessage('Género no válido'),
+    body('duration').optional().isInt({min: 1}),
 
     handleValidationErrorsWithFiles
-] 
+]; 
 
 module.exports = {
     validateRegister,
