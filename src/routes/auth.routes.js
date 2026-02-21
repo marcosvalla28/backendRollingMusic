@@ -11,6 +11,7 @@ const router = express.Router();
 router.post("/register", uploadProfile, validateRegister, register);
 router.post("/verify-email", validateVerifyEmail, verifyEmail);
 router.post("/login", validateLogin, login);
+router.put("/profile/update", auth, updateProfile);
 
 //ENDPOINTS PRIVADOS
 router.post("/logout", auth, logout);
