@@ -13,6 +13,8 @@ const connectDB = require("./config/database");
 const createSuperAdmin = require("./utils/createSuperAdmin");
 const errorHanlder = require("./middlewares/errorHandler");
 const favoritesRoutes = require("./routes/favorite.routes");
+const playlistRoutes = require("./routes/playlist.routes");
+
 
 const app = express();
 
@@ -21,13 +23,16 @@ connectDB();
 createSuperAdmin();
 
 app.use(cors({
-  origin: "https://rolling-music.vercel.app",
-  credentials: true  //recibir cookie 
+  origin: [
+    "http://localhost:5173",
+    "https://rolling-music.vercel.app"
+  ]
 }));
 app.use(morgan("dev"));
 app.use(express.json());
 app.use(cookieParser());
 app.use(express.urlencoded({extended: true}));
+
 
 app.use('/uploads', express.static(path.join(__dirname, '../uploads'), {
     setHeaders: (res, path) => {
@@ -50,6 +55,7 @@ app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/song", songRoutes);
 app.use("/api/v1/users", userRoutes);
 app.use("/api/v1/favorites", favoritesRoutes);
+app.use("/api/v1/playlists", playlistRoutes);
 
 //ACA HAY QUE LLAMAR AL MIDDELWARE MANEJADOR DE ERRORES
 app.use(errorHanlder);
