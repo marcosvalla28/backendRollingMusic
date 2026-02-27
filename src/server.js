@@ -5,10 +5,10 @@ const path = require("path");
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
 
-//IMPORTAMOS
 const authRoutes = require("./routes/auth.routes");
 const songRoutes = require("./routes/song.routes");
 const userRoutes = require("./routes/user.routes");
+const playlistRoutes = require("./routes/playlist.routes"); 
 const connectDB = require("./config/database");
 const createSuperAdmin = require("./utils/createSuperAdmin");
 const errorHanlder = require("./middlewares/errorHandler");
@@ -18,45 +18,36 @@ const playlistRoutes = require("./routes/playlist.routes");
 const app = express();
 
 connectDB();
-
 createSuperAdmin();
 
-app.use(
-  cors({
-    origin: [
-      "https://rolling-music.vercel.app",
-      "http://localhost:5173", // local
-    ],
-  }),
-);
+app.use(cors({
+  origin: "https://rolling-music.vercel.app",
+  credentials: true
+}));
 app.use(morgan("dev"));
 app.use(express.json());
 app.use(cookieParser());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.urlencoded({extended: true}));
 
-app.use(
-  "/uploads",
-  express.static(path.join(__dirname, "../uploads"), {
+app.use('/uploads', express.static(path.join(__dirname, '../uploads'), {
     setHeaders: (res, filePath) => {
-      res.set("Content-Disposition", "inline");
-      if (filePath.endsWith(".mp3")) {
-        res.set("Content-Type", "audio/mpeg");
-      }
-    },
-  }),
-);
+        res.set('Access-Control-Allow-Origin', '*');
+        res.set('Content-Disposition', 'inline');
+        if (filePath.endsWith('.mp3')) {
+            res.set('Content-Type', 'audio/mpeg');
+        }
+    }
+}));
 
-//ENRUTADORES
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/song", songRoutes);
 app.use("/api/v1/users", userRoutes);
 app.use("/api/v1/favorites", favoritesRoutes);
 app.use("/api/v1/playlists", playlistRoutes);
 
-//ACA HAY QUE LLAMAR AL MIDDELWARE MANEJADOR DE ERRORES
 app.use(errorHanlder);
 
 const port = process.env.PORT || 3000;
 app.listen(port, () => {
-  console.log(`Servidor corriendo en http://localhost:${port}`);
+    console.log(`Servidor corriendo en http://localhost:${port}`)
 });

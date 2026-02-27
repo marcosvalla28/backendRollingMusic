@@ -20,7 +20,7 @@ const globalLimiter = rateLimit({
 //LIMITADOR PARA EL AUTH
 const authLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, //15 minutos
-    max:2, //LIMITA CADA IP A X NUMEROS DE SOLICITUDES POR VENTANA (WINDOWSMS)
+    max:15, //LIMITA CADA IP A X NUMEROS DE SOLICITUDES POR VENTANA, puse 15 para desarrollo
     message:{
         success: false,
         message:'Demasiados intentos de acceso. Intente mas tarde'
