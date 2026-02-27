@@ -1,7 +1,7 @@
 const express = require("express");
 require("dotenv").config();
 const morgan = require("morgan");
-const path = require('path');
+const path = require("path");
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
 
@@ -13,6 +13,7 @@ const connectDB = require("./config/database");
 const createSuperAdmin = require("./utils/createSuperAdmin");
 const errorHanlder = require("./middlewares/errorHandler");
 const favoritesRoutes = require("./routes/favorite.routes");
+const playlistRoutes = require("./routes/playlist.routes");
 
 const app = express();
 
